@@ -27,8 +27,9 @@ public class LCS {
         }
         Reader reader = new Reader();
         if(config.getBoolean("tabulation")){
-            System.out.println("Solved by Tabulation algorithm");
+            System.out.println("Algoritmo Tabulation");
             if (config.contains("file")) {
+                System.out.println("Archivo: " + config.getString("file"));
                 reader.read(config.getString("file"));
                 tabulationFile(reader, config);
             }
@@ -39,7 +40,7 @@ public class LCS {
                     System.exit(1);
                 }
                 for(File archivo : carpeta.listFiles()) {
-                    System.out.println(archivo.getName());
+                    System.out.println("Archivo: "+archivo.getName());
                     reader.clear();
                     reader.read(carpeta.getName() + "/" + archivo.getName());
                     tabulationFile(reader, config);
@@ -48,8 +49,9 @@ public class LCS {
         }
         
         if(config.getBoolean("memoization")){
-            System.out.println("Solved by Memoization algorithm");
+            System.out.println("Algoritmo Memoization");
             if (config.contains("file")) {
+                System.out.println("Archivo: " + config.getString("file"));
                 reader.read(config.getString("file"));
                 memoizationFile(reader, config);
             }
@@ -60,10 +62,32 @@ public class LCS {
                     System.exit(1);
                 }
                 for(File archivo : carpeta.listFiles()) {
-                    System.out.println(archivo.getName());
+                    System.out.println("Archivo: "+archivo.getName());
                     reader.clear();
                     reader.read(carpeta.getName() + "/" + archivo.getName());
                     memoizationFile(reader, config);
+                }
+            }
+        }
+        
+        if(config.getBoolean("check")){
+            System.out.println("Comprobando ambos algoritmos");
+            if (config.contains("file")) {
+                System.out.println("Archivo: " + config.getString("file"));
+                reader.read(config.getString("file"));
+                checkFile(reader, config);
+            }
+            if (config.contains("directory")) {
+                File carpeta = new File(config.getString("directory"));
+                if (carpeta == null){
+                    System.err.println("El directorio no existe");
+                    System.exit(1);
+                }
+                for(File archivo : carpeta.listFiles()) {
+                    System.out.println("Archivo: " + archivo.getName());
+                    reader.clear();
+                    reader.read(carpeta.getName() + "/" + archivo.getName());
+                    checkFile(reader, config);
                 }
             }
         }
@@ -117,13 +141,22 @@ public class LCS {
         sequence_1 = reader.getSequence_1();
         sequence_2 = reader.getSequence_2();
         long begin = System.currentTimeMillis();
-        
+        String res = Tabulation.tabulation(sequence_1, sequence_2);
         long end = System.currentTimeMillis();
+        
+                
+        if (config.getBoolean("subsequence")) {
+            System.out.println(res);
+        }
+
+        if (config.getBoolean("length")) {
+            System.out.println(res.length());
+        }
 
         if (config.getBoolean("time")) {
             System.out.println("Time: " + (end - begin) + " ms");
         }
-
+        
     }
     
     private static void memoizationFile(Reader reader, JSAPResult config) {
@@ -141,6 +174,34 @@ public class LCS {
 
         if (config.getBoolean("length")) {
             System.out.println(res.length());
+        }
+
+        if (config.getBoolean("time")) {
+            System.out.println("Time: " + (end - begin) + " ms");
+        }
+    }
+
+    private static void checkFile(Reader reader, JSAPResult config) {
+        l1 = reader.getL1();
+        l2 = reader.getL2();
+        sequence_1 = reader.getSequence_1();
+        sequence_2 = reader.getSequence_2();
+        long begin = System.currentTimeMillis();
+        String resMem = Memoization.memoization(sequence_1, sequence_2);
+        String resTab = Tabulation.tabulation(sequence_1, sequence_2);
+        long end = System.currentTimeMillis();
+        if(resMem.length() == resTab.length()){
+            System.out.println("Ambas subcadenas son la subcadena más larga");
+        }else {
+            System.out.println("Los algoritmos no coinciden");
+        }
+
+        if (config.getBoolean("subsequence")) {
+            System.out.println("Cadena Memoization: "+ resMem + "\nCadena Tabulation: " + resTab);
+        }
+
+        if (config.getBoolean("length")) {
+            System.out.println("Longitud Cadena Memoization: "+ resMem.length() + "\nLongitud Cadena Tabulation: " + resTab.length());
         }
 
         if (config.getBoolean("time")) {
